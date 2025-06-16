@@ -2,6 +2,7 @@
 
 import { Inter } from "next/font/google";
 import "./globals.css";
+import { ConnectButton } from '@rainbow-me/rainbowkit';
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -53,11 +54,9 @@ export default function RootLayout({
                     </div>
                     <div className="hidden md:block">
                       <div className="ml-10 flex items-baseline space-x-4">
-                        <a href="#" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Home</a>
-                        <a href="#how-it-works" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">How It Works</a>
-                        <a href="#use-cases" className="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Use Cases</a>
-                       
-                        <button className="bg-orange-300 text-black px-4 py-2 rounded-full text-md font-medium hover:bg-orange-400">
+
+                        <ConnectButton />
+                        <button className="bg-orange-300 text-black px-4 py-2 rounded-full text-md font-medium hover:bg-orange-400 ml-[30px]">
                           <a href="/launch">Launch App</a>
                         </button>
                       </div>

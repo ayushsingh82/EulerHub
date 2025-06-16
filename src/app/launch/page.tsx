@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import Image from "next/image";
 import { ethers } from 'ethers';
 import { ModularUniswapV2Swapper, SEPOLIA_TOKENS } from './swapUtils';
-import { ConnectButton } from '@rainbow-me/rainbowkit';
 import { useAccount } from 'wagmi';
 
 // Token interface
@@ -12,17 +11,6 @@ interface Token {
   address: string;
   decimals: number;
   symbol: string;
-}
-
-// Type guard for Token
-function isToken(obj: unknown): obj is Token {
-  return (
-    typeof obj === 'object' &&
-    obj !== null &&
-    'address' in obj &&
-    'decimals' in obj &&
-    'symbol' in obj
-  );
 }
 
 export default function LaunchPage() {
@@ -53,8 +41,8 @@ export default function LaunchPage() {
       const expectedOut = amounts[1];
       
       setPrice(ethers.utils.formatUnits(expectedOut, toToken.decimals));
-    } catch (error: unknown) {
-      console.error('Error calculating price:', error instanceof Error ? error.message : String(error));
+    } catch (error) {
+      console.error('Error calculating price:', error);
     }
   };
 
@@ -86,7 +74,7 @@ export default function LaunchPage() {
         alert('Swap failed: ' + result.error);
       }
     } catch (error: unknown) {
-      console.error('Error during swap:', error instanceof Error ? error.message : String(error));
+      console.error('Error during swap:', error);
       alert('Swap failed: ' + (error instanceof Error ? error.message : String(error)));
     } finally {
       setIsLoading(false);
@@ -247,8 +235,8 @@ export default function LaunchPage() {
                 )}
               </button>
             ) : (
-              <div className="mt-4">
-                <ConnectButton />
+              <div className="mt-4 text-center text-gray-400">
+                Please connect your wallet to swap
               </div>
             )}
           </div>
@@ -269,35 +257,32 @@ export default function LaunchPage() {
                   </button>
                 </div>
                 <div className="space-y-2">
-                  {Object.values(SEPOLIA_TOKENS).map((token) => {
-                    if (!isToken(token)) return null;
-                    return (
-                      <button
-                        key={token.symbol}
-                        className="w-full flex items-center gap-3 p-3 hover:bg-gray-800 rounded-xl transition-colors"
-                        onClick={() => {
-                          if (showTokenList === 'from') {
-                            setFromToken(token);
-                          } else {
-                            setToToken(token);
-                          }
-                          setShowTokenList(null);
-                        }}
-                      >
-                        <Image
-                          src={`/${token.symbol.toLowerCase()}.png`}
-                          alt={token.symbol}
-                          width={32}
-                          height={32}
-                          className="rounded-full"
-                        />
-                        <div className="text-left">
-                          <div className="font-medium">{token.symbol}</div>
-                          <div className="text-sm text-gray-400">{token.address.slice(0, 6)}...{token.address.slice(-4)}</div>
-                        </div>
-                      </button>
-                    );
-                  })}
+                  {Object.values(SEPOLIA_TOKENS).map((token) => (
+                    <button
+                      key={token.symbol}
+                      className="w-full flex items-center gap-3 p-3 hover:bg-gray-800 rounded-xl transition-colors"
+                      onClick={() => {
+                        if (showTokenList === 'from') {
+                          setFromToken(token);
+                        } else {
+                          setToToken(token);
+                        }
+                        setShowTokenList(null);
+                      }}
+                    >
+                      <Image
+                        src={`/${token.symbol.toLowerCase()}.png`}
+                        alt={token.symbol}
+                        width={32}
+                        height={32}
+                        className="rounded-full"
+                      />
+                      <div className="text-left">
+                        <div className="font-medium">{token.symbol}</div>
+                        <div className="text-sm text-gray-400">{token.address.slice(0, 6)}...{token.address.slice(-4)}</div>
+                      </div>
+                    </button>
+                  ))}
                 </div>
               </div>
             </div>
