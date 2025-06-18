@@ -140,13 +140,6 @@ export default function LaunchPage() {
                   className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-lg"
                   onClick={() => setShowTokenList('from')}
                 >
-                  <Image
-                    src={`/${fromToken.symbol.toLowerCase()}.png`}
-                    alt={fromToken.symbol}
-                    width={24}
-                    height={24}
-                    className="rounded-full"
-                  />
                   <span>{fromToken.symbol}</span>
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -188,13 +181,6 @@ export default function LaunchPage() {
                   className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded-lg"
                   onClick={() => setShowTokenList('to')}
                 >
-                  <Image
-                    src={`/${toToken.symbol.toLowerCase()}.png`}
-                    alt={toToken.symbol}
-                    width={24}
-                    height={24}
-                    className="rounded-full"
-                  />
                   <span>{toToken.symbol}</span>
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
                     <path fillRule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clipRule="evenodd" />
@@ -270,13 +256,6 @@ export default function LaunchPage() {
                         setShowTokenList(null);
                       }}
                     >
-                      <Image
-                        src={`/${token.symbol.toLowerCase()}.png`}
-                        alt={token.symbol}
-                        width={32}
-                        height={32}
-                        className="rounded-full"
-                      />
                       <div className="text-left">
                         <div className="font-medium">{token.symbol}</div>
                         <div className="text-sm text-gray-400">{token.address.slice(0, 6)}...{token.address.slice(-4)}</div>
