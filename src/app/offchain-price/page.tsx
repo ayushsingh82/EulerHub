@@ -121,7 +121,7 @@ const OffchainPricePage = () => {
         <div className="absolute inset-0 bg-black/50"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <h1 className="text-4xl md:text-6xl font-bold text-white mb-6">
+            <h1 className="text-3xl md:text-4xl font-bold text-orange-300 mb-6">
               Off-Chain Price Feeds
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
