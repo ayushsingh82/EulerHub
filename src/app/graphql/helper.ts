@@ -26,7 +26,7 @@ export const QUERIES = {
   `,
   
   GET_VAULT_STATUS_BY_ID: `
-    query GetVaultStatus($id: ID!) {
+    query GetVaultStatus($id: String!) {
       vaultStatus(id: $id) {
         id
         accumulatedFees
@@ -50,7 +50,7 @@ export const QUERIES = {
   `,
 
   GET_EULER_VAULT_BY_ID: `
-    query GetEulerVault($id: ID!) {
+    query GetEulerVault($id: String!) {
       eulerVault(id: $id) {
         id
         creator
@@ -73,7 +73,7 @@ export const QUERIES = {
   `,
 
   GET_BORROW_BY_ID: `
-    query GetBorrow($id: ID!) {
+    query GetBorrow($id: String!) {
       borrow(id: $id) {
         id
         account
@@ -120,16 +120,20 @@ export async function executeQuery<T>(
 ): Promise<T> {
   const endpoint = GRAPHQL_ENDPOINTS[network];
   
+  const requestBody = {
+    query,
+    variables: variables || {}
+  };
+  
+  console.log('GraphQL Request:', JSON.stringify(requestBody, null, 2));
+  
   try {
     const response = await fetch(endpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        query,
-        variables: variables || {}
-      }),
+      body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
@@ -137,6 +141,8 @@ export async function executeQuery<T>(
     }
 
     const result: GraphQLResponse<T> = await response.json();
+    
+    console.log('GraphQL Response:', JSON.stringify(result, null, 2));
     
     if (result.errors) {
       throw new Error(`GraphQL errors: ${JSON.stringify(result.errors)}`);
@@ -158,10 +164,11 @@ export async function getVaultStatuses(network: Network) {
 }
 
 export async function getVaultStatusById(network: Network, id: string) {
+  console.log('Executing vault status query with ID:', id);
   return executeQuery<{ vaultStatus: VaultStatus }>(
     network,
     QUERIES.GET_VAULT_STATUS_BY_ID,
-    { id }
+    { id: id.toString() }
   );
 }
 
@@ -173,10 +180,11 @@ export async function getEulerVaults(network: Network) {
 }
 
 export async function getEulerVaultById(network: Network, id: string) {
+  console.log('Executing Euler vault query with ID:', id);
   return executeQuery<{ eulerVault: EulerVault }>(
     network,
     QUERIES.GET_EULER_VAULT_BY_ID,
-    { id }
+    { id: id.toString() }
   );
 }
 
@@ -188,9 +196,11 @@ export async function getBorrows(network: Network) {
 }
 
 export async function getBorrowById(network: Network, id: string) {
+  console.log('Executing borrow query with ID:', id);
   return executeQuery<{ borrow: Borrow }>(
     network,
     QUERIES.GET_BORROW_BY_ID,
-    { id }
+    { id: id.toString() }
   );
 }
+

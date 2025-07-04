@@ -106,6 +106,10 @@ const GraphQLPage = () => {
   const renderData = () => {
     if (!data) return null;
 
+    console.log('Rendering data:', data);
+    console.log('Query type:', queryType);
+    console.log('Query mode:', queryMode);
+
     const renderVaultStatus = (vault: VaultStatus) => (
       <div key={vault.id} className="bg-gray-900 p-4 rounded-lg border border-gray-700">
         <h4 className="text-lg font-semibold text-orange-300 mb-2">Vault: {vault.id}</h4>
@@ -141,11 +145,15 @@ const GraphQLPage = () => {
     );
 
     if (queryType === 'vaultStatus') {
-      const vaults = queryMode === 'list' ? data.vaultStatuses : [data.vaultStatus];
-      if (!vaults || vaults.length === 0) {
+      const vaults = queryMode === 'list' ? data.vaultStatuses : (data.vaultStatus ? [data.vaultStatus] : []);
+      console.log('Vault status data:', vaults);
+      if (!vaults || vaults.length === 0 || vaults.every((v: VaultStatus | null) => !v)) {
         return (
           <div className="text-center py-8 text-gray-400">
             <p>No vault status data found for this query</p>
+            {queryMode === 'single' && (
+              <p className="text-sm mt-2">The specified ID might not exist or the query returned null</p>
+            )}
           </div>
         );
       }
@@ -155,11 +163,15 @@ const GraphQLPage = () => {
         </div>
       );
     } else if (queryType === 'eulerVault') {
-      const vaults = queryMode === 'list' ? data.eulerVaults : [data.eulerVault];
-      if (!vaults || vaults.length === 0) {
+      const vaults = queryMode === 'list' ? data.eulerVaults : (data.eulerVault ? [data.eulerVault] : []);
+      console.log('Euler vault data:', vaults);
+      if (!vaults || vaults.length === 0 || vaults.every((v: EulerVault | null) => !v)) {
         return (
           <div className="text-center py-8 text-gray-400">
             <p>No Euler vault data found for this query</p>
+            {queryMode === 'single' && (
+              <p className="text-sm mt-2">The specified ID might not exist or the query returned null</p>
+            )}
           </div>
         );
       }
@@ -169,11 +181,15 @@ const GraphQLPage = () => {
         </div>
       );
     } else if (queryType === 'borrow') {
-      const borrows = queryMode === 'list' ? data.borrows : [data.borrow];
-      if (!borrows || borrows.length === 0) {
+      const borrows = queryMode === 'list' ? data.borrows : (data.borrow ? [data.borrow] : []);
+      console.log('Borrow data:', borrows);
+      if (!borrows || borrows.length === 0 || borrows.every((b: Borrow | null) => !b)) {
         return (
           <div className="text-center py-8 text-gray-400">
             <p>No borrow data found for this query</p>
+            {queryMode === 'single' && (
+              <p className="text-sm mt-2">The specified ID might not exist or the query returned null</p>
+            )}
           </div>
         );
       }
@@ -302,10 +318,14 @@ const GraphQLPage = () => {
 
           {data && !loading && (
             <div>
-                          <div className="mb-4 p-3 bg-gray-800 rounded-lg">
-              <span className="text-sm text-gray-400">Endpoint: </span>
-              <span className="text-sm text-blue-400 font-mono">{GRAPHQL_ENDPOINTS[selectedNetwork]}</span>
-            </div>
+              <div className="mb-4 p-3 bg-gray-800 rounded-lg">
+                <span className="text-sm text-gray-400">Endpoint: </span>
+                <span className="text-sm text-blue-400 font-mono">{GRAPHQL_ENDPOINTS[selectedNetwork]}</span>
+              </div>
+              <div className="mb-4 p-3 bg-gray-800 rounded-lg">
+                <span className="text-sm text-gray-400">Debug - Data Structure: </span>
+                <pre className="text-sm text-blue-400 font-mono mt-2 overflow-auto">{JSON.stringify(data, null, 2)}</pre>
+              </div>
               {renderData()}
             </div>
           )}

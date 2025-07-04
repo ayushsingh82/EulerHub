@@ -176,12 +176,22 @@ export default function RootLayout({
                       <span className="text-xl font-bold"><a href="/">EulerSwap</a></span>
                     </div>
                     <div className="hidden md:block">
-                      <div className="ml-10 flex items-baseline space-x-4">
-
+                      <div className="flex items-center space-x-6">
+                        {/* Navigation Buttons */}
+                        <a href="/graphql" className="text-gray-300 hover:text-orange-300 transition-colors px-3 py-2 rounded-md text-sm font-medium">
+                          GraphQL
+                        </a>
+                        <a href="/pyth" className="text-gray-300 hover:text-orange-300 transition-colors px-3 py-2 rounded-md text-sm font-medium">
+                          Pyth
+                        </a>
+                        <a href="/verified-vault" className="text-gray-300 hover:text-orange-300 transition-colors px-3 py-2 rounded-md text-sm font-medium">
+                          Verified Vault
+                        </a>
+                        <a href="/offchain-price" className="text-gray-300 hover:text-orange-300 transition-colors px-3 py-2 rounded-md text-sm font-medium">
+                          Offchain
+                        </a>
+                        
                         <ConnectButton />
-                        <button className="bg-orange-300 text-black px-4 py-2 rounded-full text-md font-medium hover:bg-orange-400 ml-[30px]">
-                          <a href="/launch">Launch App</a>
-                        </button>
                       </div>
                     </div>
                   </div>
