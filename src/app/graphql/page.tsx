@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   GRAPHQL_ENDPOINTS,
   Network,
@@ -16,6 +16,7 @@ import {
 } from './helper';
 
 const GraphQLPage = () => {
+  const [mounted, setMounted] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState<Network>('mainnet');
   const [queryType, setQueryType] = useState<'vaultStatus' | 'eulerVault' | 'borrow'>('vaultStatus');
   const [queryMode, setQueryMode] = useState<'list' | 'single'>('list');
@@ -26,7 +27,28 @@ const GraphQLPage = () => {
 
   const networks = Object.keys(GRAPHQL_ENDPOINTS) as Network[];
 
+  // Ensure component only renders on client
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Don't render until mounted on client
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-black text-white p-8">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex items-center justify-center py-8">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-300"></div>
+            <span className="ml-3 text-gray-400">Loading...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   const executeQuery = async () => {
+    if (!mounted) return;
+    
     setLoading(true);
     setError(null);
     setData(null);
@@ -42,7 +64,7 @@ const GraphQLPage = () => {
             if (!inputId.trim()) {
               throw new Error('Please enter a vault ID');
             }
-            result = await getVaultStatusById(selectedNetwork, inputId);
+            result = await getVaultStatusById(selectedNetwork, inputId.trim());
           }
           break;
           
@@ -53,7 +75,7 @@ const GraphQLPage = () => {
             if (!inputId.trim()) {
               throw new Error('Please enter a vault ID');
             }
-            result = await getEulerVaultById(selectedNetwork, inputId);
+            result = await getEulerVaultById(selectedNetwork, inputId.trim());
           }
           break;
           
@@ -64,7 +86,7 @@ const GraphQLPage = () => {
             if (!inputId.trim()) {
               throw new Error('Please enter a borrow ID');
             }
-            result = await getBorrowById(selectedNetwork, inputId);
+            result = await getBorrowById(selectedNetwork, inputId.trim());
           }
           break;
           
@@ -74,7 +96,8 @@ const GraphQLPage = () => {
       
       setData(result);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
+      console.error('GraphQL query error:', err);
+      setError(err instanceof Error ? err.message : 'An error occurred while executing the query');
     } finally {
       setLoading(false);
     }
@@ -84,70 +107,91 @@ const GraphQLPage = () => {
     if (!data) return null;
 
     const renderVaultStatus = (vault: VaultStatus) => (
-      <div key={vault.id} className="bg-gray-800 p-4 rounded-lg border border-gray-700">
-        <h4 className="text-lg font-semibold text-blue-400 mb-2">Vault: {vault.id}</h4>
+      <div key={vault.id} className="bg-gray-900 p-4 rounded-lg border border-gray-700">
+        <h4 className="text-lg font-semibold text-orange-300 mb-2">Vault: {vault.id}</h4>
         <div className="grid grid-cols-2 gap-2 text-sm">
-          <div><span className="text-gray-400">Accumulated Fees:</span> {vault.accumulatedFees}</div>
-          <div><span className="text-gray-400">Interest Rate:</span> {vault.interestRate}</div>
-          <div><span className="text-gray-400">Total Borrows:</span> {vault.totalBorrows}</div>
-          <div><span className="text-gray-400">Total Shares:</span> {vault.totalShares}</div>
+          <div><span className="text-gray-400">Accumulated Fees:</span> <span className="text-blue-400">{vault.accumulatedFees}</span></div>
+          <div><span className="text-gray-400">Interest Rate:</span> <span className="text-blue-400">{vault.interestRate}</span></div>
+          <div><span className="text-gray-400">Total Borrows:</span> <span className="text-blue-400">{vault.totalBorrows}</span></div>
+          <div><span className="text-gray-400">Total Shares:</span> <span className="text-blue-400">{vault.totalShares}</span></div>
         </div>
       </div>
     );
 
     const renderEulerVault = (vault: EulerVault) => (
-      <div key={vault.id} className="bg-gray-800 p-4 rounded-lg border border-gray-700">
-        <h4 className="text-lg font-semibold text-green-400 mb-2">Euler Vault: {vault.id}</h4>
+      <div key={vault.id} className="bg-gray-900 p-4 rounded-lg border border-gray-700">
+        <h4 className="text-lg font-semibold text-orange-500 mb-2">Euler Vault: {vault.id}</h4>
         <div className="grid grid-cols-2 gap-2 text-sm">
-          <div><span className="text-gray-400">Creator:</span> {vault.creator}</div>
-          <div><span className="text-gray-400">Governor Admin:</span> {vault.governonAdmin}</div>
-          <div><span className="text-gray-400">Symbol:</span> {vault.symbol}</div>
+          <div><span className="text-gray-400">Creator:</span> <span className="text-blue-400">{vault.creator}</span></div>
+          <div><span className="text-gray-400">Governor Admin:</span> <span className="text-blue-400">{vault.governonAdmin}</span></div>
+          <div><span className="text-gray-400">Symbol:</span> <span className="text-blue-400">{vault.symbol}</span></div>
         </div>
       </div>
     );
 
     const renderBorrow = (borrow: Borrow) => (
-      <div key={borrow.id} className="bg-gray-800 p-4 rounded-lg border border-gray-700">
-        <h4 className="text-lg font-semibold text-purple-400 mb-2">Borrow: {borrow.id}</h4>
+      <div key={borrow.id} className="bg-gray-900 p-4 rounded-lg border border-gray-700">
+        <h4 className="text-lg font-semibold text-orange-300 mb-2">Borrow: {borrow.id}</h4>
         <div className="grid grid-cols-2 gap-2 text-sm">
-          <div><span className="text-gray-400">Account:</span> {borrow.account}</div>
-          <div><span className="text-gray-400">Assets:</span> {borrow.assets}</div>
-          <div><span className="text-gray-400">Vault:</span> {borrow.vault}</div>
+          <div><span className="text-gray-400">Account:</span> <span className="text-blue-400">{borrow.account}</span></div>
+          <div><span className="text-gray-400">Assets:</span> <span className="text-blue-400">{borrow.assets}</span></div>
+          <div><span className="text-gray-400">Vault:</span> <span className="text-blue-400">{borrow.vault}</span></div>
         </div>
       </div>
     );
 
     if (queryType === 'vaultStatus') {
       const vaults = queryMode === 'list' ? data.vaultStatuses : [data.vaultStatus];
+      if (!vaults || vaults.length === 0) {
+        return (
+          <div className="text-center py-8 text-gray-400">
+            <p>No vault status data found for this query</p>
+          </div>
+        );
+      }
       return (
         <div className="space-y-4">
-          {vaults.map(renderVaultStatus)}
+          {vaults.filter(Boolean).map(renderVaultStatus)}
         </div>
       );
     } else if (queryType === 'eulerVault') {
       const vaults = queryMode === 'list' ? data.eulerVaults : [data.eulerVault];
+      if (!vaults || vaults.length === 0) {
+        return (
+          <div className="text-center py-8 text-gray-400">
+            <p>No Euler vault data found for this query</p>
+          </div>
+        );
+      }
       return (
         <div className="space-y-4">
-          {vaults.map(renderEulerVault)}
+          {vaults.filter(Boolean).map(renderEulerVault)}
         </div>
       );
     } else if (queryType === 'borrow') {
       const borrows = queryMode === 'list' ? data.borrows : [data.borrow];
+      if (!borrows || borrows.length === 0) {
+        return (
+          <div className="text-center py-8 text-gray-400">
+            <p>No borrow data found for this query</p>
+          </div>
+        );
+      }
       return (
         <div className="space-y-4">
-          {borrows.map(renderBorrow)}
+          {borrows.filter(Boolean).map(renderBorrow)}
         </div>
       );
     }
 
-    return <pre className="bg-gray-800 p-4 rounded-lg overflow-auto">{JSON.stringify(data, null, 2)}</pre>;
+    return <pre className="bg-gray-900 p-4 rounded-lg overflow-auto text-blue-400">{JSON.stringify(data, null, 2)}</pre>;
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-8">
+    <div className="min-h-screen bg-black text-white p-8">
       <div className="max-w-6xl mx-auto">
         <div className="mb-8">
-          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+          <h1 className="text-4xl font-bold mb-4 bg-gradient-to-r from-orange-300 to-orange-400 bg-clip-text text-transparent">
             Euler GraphQL Explorer
           </h1>
           <p className="text-gray-400 text-lg">
@@ -156,8 +200,8 @@ const GraphQLPage = () => {
         </div>
 
         {/* Configuration Panel */}
-        <div className="bg-gray-800 p-6 rounded-lg border border-gray-700 mb-8">
-          <h2 className="text-2xl font-semibold mb-6 text-blue-400">Query Configuration</h2>
+        <div className="bg-gray-900 p-6 rounded-lg border border-gray-700 mb-8">
+          <h2 className="text-2xl font-semibold mb-6 text-orange-300">Query Configuration</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Network Selection */}
@@ -232,7 +276,7 @@ const GraphQLPage = () => {
             <button
               onClick={executeQuery}
               disabled={loading || (queryMode === 'single' && !inputId.trim())}
-              className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105"
+              className="bg-gradient-to-r from-orange-500 to-orange-400 hover:from-orange-600 hover:to-orange-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-semibold py-3 px-6 rounded-lg transition-all duration-200 transform hover:scale-105"
             >
               {loading ? 'Executing Query...' : 'Execute Query'}
             </button>
@@ -240,8 +284,8 @@ const GraphQLPage = () => {
         </div>
 
         {/* Results */}
-        <div className="bg-gray-800 p-6 rounded-lg border border-gray-700">
-          <h2 className="text-2xl font-semibold mb-6 text-green-400">Query Results</h2>
+        <div className="bg-gray-900 p-6 rounded-lg border border-gray-700">
+          <h2 className="text-2xl font-semibold mb-6 text-orange-300">Query Results</h2>
           
           {error && (
             <div className="bg-red-900 border border-red-700 text-red-200 px-4 py-3 rounded-lg mb-4">
@@ -251,17 +295,17 @@ const GraphQLPage = () => {
 
           {loading && (
             <div className="flex items-center justify-center py-8">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-400"></div>
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-orange-500"></div>
               <span className="ml-3 text-gray-400">Loading data...</span>
             </div>
           )}
 
           {data && !loading && (
             <div>
-              <div className="mb-4 p-3 bg-gray-700 rounded-lg">
-                <span className="text-sm text-gray-400">Endpoint: </span>
-                <span className="text-sm text-blue-400 font-mono">{GRAPHQL_ENDPOINTS[selectedNetwork]}</span>
-              </div>
+                          <div className="mb-4 p-3 bg-gray-800 rounded-lg">
+              <span className="text-sm text-gray-400">Endpoint: </span>
+              <span className="text-sm text-blue-400 font-mono">{GRAPHQL_ENDPOINTS[selectedNetwork]}</span>
+            </div>
               {renderData()}
             </div>
           )}
@@ -274,12 +318,12 @@ const GraphQLPage = () => {
         </div>
 
         {/* Documentation */}
-        <div className="mt-8 bg-gray-800 p-6 rounded-lg border border-gray-700">
-          <h2 className="text-2xl font-semibold mb-6 text-yellow-400">Documentation</h2>
+        <div className="mt-8 bg-gray-900 p-6 rounded-lg border border-gray-700">
+          <h2 className="text-2xl font-semibold mb-6 text-orange-400">Documentation</h2>
           
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div>
-              <h3 className="text-lg font-semibold text-blue-400 mb-3">Vault Status</h3>
+              <h3 className="text-lg font-semibold text-orange-300 mb-3">Vault Status</h3>
               <p className="text-gray-400 text-sm mb-2">Query vault status information including:</p>
               <ul className="text-gray-400 text-sm space-y-1">
                 <li>• Accumulated fees</li>
@@ -290,7 +334,7 @@ const GraphQLPage = () => {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-green-400 mb-3">Euler Vault</h3>
+              <h3 className="text-lg font-semibold text-orange-300 mb-3">Euler Vault</h3>
               <p className="text-gray-400 text-sm mb-2">Query Euler vault details including:</p>
               <ul className="text-gray-400 text-sm space-y-1">
                 <li>• Creator address</li>
@@ -301,7 +345,7 @@ const GraphQLPage = () => {
             </div>
 
             <div>
-              <h3 className="text-lg font-semibold text-purple-400 mb-3">Borrow</h3>
+              <h3 className="text-lg font-semibold text-orange-300 mb-3">Borrow</h3>
               <p className="text-gray-400 text-sm mb-2">Query borrow information including:</p>
               <ul className="text-gray-400 text-sm space-y-1">
                 <li>• Account address</li>
