@@ -73,16 +73,7 @@ const Footer = () => {
           <div>
             <h3 className="text-white font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
-              <li>
-                <a href="/" className="text-gray-400 hover:text-orange-300 transition-colors">
-                  Home
-                </a>
-              </li>
-              <li>
-                <a href="/launch" className="text-gray-400 hover:text-orange-300 transition-colors">
-                  Launch App
-                </a>
-              </li>
+             
               <li>
                 <a href="/pyth" className="text-gray-400 hover:text-orange-300 transition-colors">
                   Pyth Feeds
@@ -98,6 +89,7 @@ const Footer = () => {
                   Verified Vaults
                 </a>
               </li>
+            
             </ul>
           </div>
 
@@ -120,16 +112,7 @@ const Footer = () => {
                   GitHub
                 </a>
               </li>
-              <li>
-                <a href="#" className="text-gray-400 hover:text-orange-300 transition-colors">
-                  Discord
-                </a>
-              </li>
-              <li>
-                <a href="#" className="text-gray-400 hover:text-orange-300 transition-colors">
-                  Telegram
-                </a>
-              </li>
+              
             </ul>
           </div>
         </div>
@@ -190,6 +173,9 @@ export default function RootLayout({
                       </a>
                       <a href="/offchain-price" className="text-gray-300 hover:text-orange-300 transition-colors px-3 py-2 text-sm font-medium hover:underline">
                         Offchain
+                      </a>
+                      <a href="/lens" className="text-gray-300 hover:text-orange-300 transition-colors px-3 py-2 text-sm font-medium hover:underline">
+                        Lens
                       </a>
                     </div>
                     
