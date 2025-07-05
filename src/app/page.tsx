@@ -19,76 +19,115 @@ export default function Home() {
         {/* Content */}
         <div className="relative z-10 text-center px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold mb-6 text-white">
-            🔁 Automated <span className="text-orange-300">Rebalancing</span> for DeFi Portfolios on EulerSwap
+            🔍 <span className="text-orange-300">EulerSwap</span> Ecosystem Query Hub
           </h1>
           <p className="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
-            Maximize your capital efficiency with smart, non-custodial, and strategy-driven portfolio rebalancing — powered by EulerSwap.
+            The ultimate one-stop platform for querying all EulerSwap ecosystem data across multiple networks. 
+            Get real-time insights into vaults, prices, strategies, and more.
           </p>
           <div className="flex gap-4 justify-center">
-            <button className="bg-white text-black px-6 py-3 rounded-full font-medium hover:bg-gray-200 transition-colors">
-              🚀 Launch App
+            <button className="bg-orange-300 text-black px-6 py-3 rounded-full font-medium hover:bg-orange-400 transition-colors">
+              🚀 Explore Data
             </button>
             <button className="border border-white text-white px-6 py-3 rounded-full font-medium hover:bg-white/10 transition-colors">
-              📖 Learn How It Works
+              📖 View Documentation
             </button>
           </div>
         </div>
       </section>
 
-      {/* What Is It Section */}
+      {/* What We Do Section */}
       <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold mb-4">🧩 What Is It?</h2>
+          <h2 className="text-3xl font-bold mb-4">🎯 What We Do</h2>
           <p className="text-xl text-gray-400 mb-8">
-            "A Protocol That Keeps Your Portfolio in Check — Automatically."
+            "Your Complete Gateway to EulerSwap Ecosystem Data"
           </p>
           <p className="text-gray-400 max-w-3xl mx-auto">
-            We help DeFi users and protocols maintain their desired token allocations by rebalancing their positions based on strategy, time, or market conditions.
+            We provide comprehensive data querying capabilities for the entire EulerSwap ecosystem, 
+            enabling developers, analysts, and users to access real-time information across multiple networks.
           </p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {[
-            "Built on top of EulerSwap's liquidity infrastructure",
-            "Fully on-chain, non-custodial, and open-source",
-            "Supports uncorrelated and volatile asset pairs",
-            "Compatible with DAO treasuries, passive investors, and active traders"
+            "Multi-network data querying (Ethereum, BSC, Polygon, Optimism, Arbitrum, Base)",
+            "Real-time vault information and performance metrics",
+            "Price feeds from Pyth Network and off-chain sources",
+            "GraphQL API for complex data queries and analytics"
           ].map((feature, index) => (
-            <div key={index} className="bg-orange-300 p-6 rounded-lg shadow-lg border-2 border-black">
-              <p className="text-black">✅ {feature}</p>
+            <div key={index} className="bg-black p-6 rounded-lg shadow-lg border-2 border-orange-300">
+              <p className="text-white">✅ {feature}</p>
             </div>
           ))}
         </div>
       </section>
 
-      {/* How It Works Section */}
-      <section id="how-it-works" className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
-        <h2 className="text-3xl font-bold text-center mb-12">🧠 How It Works</h2>
+      {/* Features Section */}
+      <section className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto bg-gray-900">
+        <h2 className="text-3xl font-bold text-center mb-12">🔧 Our Features</h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="bg-orange-300 p-6 rounded-lg shadow-lg">
-            <h3 className="text-xl font-semibold mb-4 text-black">Choose a Rebalancing Strategy</h3>
-            <ul className="text-black space-y-2">
-              <li>• Time-based (e.g., every 24 hours)</li>
-              <li>• Threshold-based (e.g., &gt;10% drift)</li>
-              <li>• Volatility-aware or hybrid</li>
+          <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+            <h3 className="text-xl font-semibold mb-4 text-orange-300">📊 GraphQL Explorer</h3>
+            <ul className="text-gray-300 space-y-2">
+              <li>• Query vault statuses across networks</li>
+              <li>• Access Euler vault data and borrows</li>
+              <li>• Real-time data with GraphQL interface</li>
+              <li>• Custom queries for specific use cases</li>
             </ul>
           </div>
-          <div className="bg-orange-300 p-6 rounded-lg shadow-lg">
-            <h3 className="text-xl font-semibold mb-4 text-black">Deposit Token Pair</h3>
-            <ul className="text-gray-800 space-y-2">
-              <li>• Example: $ETH / $USDC or $WBTC / $stETH</li>
-              <li>• Define desired allocation (e.g., 60/40)</li>
+          <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+            <h3 className="text-xl font-semibold mb-4 text-orange-300">🔍 Lens Contract Queries</h3>
+            <ul className="text-gray-300 space-y-2">
+              <li>• UtilsLens for ERC-4626 vault data</li>
+              <li>• VaultLens for detailed vault information</li>
+              <li>• EulerEarnVaultLens for strategy data</li>
+              <li>• APYs, balances, and price lookups</li>
             </ul>
           </div>
-          <div className="bg-orange-300 p-6 rounded-lg shadow-lg">
-            <h3 className="text-xl font-semibold mb-4 text-black">Smart Rebalancing</h3>
-            <ul className="text-gray-800 space-y-2">
-              <li>• On-chain keeper or user triggers rebalance</li>
-              <li>• Uses EulerSwap's deep liquidity</li>
-              <li>• Optional: Fees go to treasury, vault owners, or reinvested</li>
+          <div className="bg-gray-800 p-6 rounded-lg shadow-lg border border-gray-700">
+            <h3 className="text-xl font-semibold mb-4 text-orange-300">💰 Price Feeds</h3>
+            <ul className="text-gray-300 space-y-2">
+              <li>• Pyth Network price feeds</li>
+              <li>• Off-chain price data sources</li>
+              <li>• Verified vault price information</li>
+              <li>• Multi-source price aggregation</li>
             </ul>
           </div>
         </div>
       </section>
+
+      {/* How It Works Section */}
+      <section id="how-it-works" className="py-16 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+        <h2 className="text-3xl font-bold text-center mb-12">🚀 How It Works</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="bg-orange-300 p-6 rounded-lg shadow-lg">
+            <h3 className="text-xl font-semibold mb-4 text-black">1. Select Network & Data Type</h3>
+            <ul className="text-black space-y-2">
+              <li>• Choose from 6 supported networks</li>
+              <li>• Pick your data source (GraphQL, Lens, Pyth)</li>
+              <li>• Specify query parameters</li>
+            </ul>
+          </div>
+          <div className="bg-orange-300 p-6 rounded-lg shadow-lg">
+            <h3 className="text-xl font-semibold mb-4 text-black">2. Execute Queries</h3>
+            <ul className="text-black space-y-2">
+              <li>• Real-time contract calls</li>
+              <li>• GraphQL endpoint queries</li>
+              <li>• Price feed aggregations</li>
+            </ul>
+          </div>
+          <div className="bg-orange-300 p-6 rounded-lg shadow-lg">
+            <h3 className="text-xl font-semibold mb-4 text-black">3. Get Insights</h3>
+            <ul className="text-black space-y-2">
+              <li>• Formatted JSON responses</li>
+              <li>• Real-time data visualization</li>
+              <li>• Export capabilities for analysis</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+
     </div>
   );
 }

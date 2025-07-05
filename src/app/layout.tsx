@@ -161,20 +161,20 @@ export default function RootLayout({
                     </div>
                     
                     {/* Navigation Links in center */}
-                    <div className="hidden md:flex items-center space-x-8">
-                      <a href="/graphql" className="text-gray-300 hover:text-orange-300 transition-colors px-3 py-2 text-sm font-medium hover:underline">
+                    <div className="hidden md:flex items-center space-x-4">
+                      <a href="/graphql" className="text-gray-300 hover:text-orange-300 transition-colors px-2 py-2 text-sm font-medium hover:underline">
                         GraphQL
                       </a>
-                      <a href="/pyth" className="text-gray-300 hover:text-orange-300 transition-colors px-3 py-2 text-sm font-medium hover:underline">
+                      <a href="/pyth" className="text-gray-300 hover:text-orange-300 transition-colors px-2 py-2 text-sm font-medium hover:underline">
                         Pyth
                       </a>
-                      <a href="/verified-vault" className="text-gray-300 hover:text-orange-300 transition-colors px-3 py-2 text-sm font-medium hover:underline">
+                      <a href="/verified-vault" className="text-gray-300 hover:text-orange-300 transition-colors px-2 py-2 text-sm font-medium hover:underline">
                         Verified Vault
                       </a>
-                      <a href="/offchain-price" className="text-gray-300 hover:text-orange-300 transition-colors px-3 py-2 text-sm font-medium hover:underline">
+                      <a href="/offchain-price" className="text-gray-300 hover:text-orange-300 transition-colors px-2 py-2 text-sm font-medium hover:underline">
                         Offchain
                       </a>
-                      <a href="/lens" className="text-gray-300 hover:text-orange-300 transition-colors px-3 py-2 text-sm font-medium hover:underline">
+                      <a href="/lens" className="text-gray-300 hover:text-orange-300 transition-colors px-2 py-2 text-sm font-medium hover:underline">
                         Lens
                       </a>
                     </div>
