@@ -172,27 +172,30 @@ export default function RootLayout({
               <nav className="fixed top-0 w-full bg-black/80 backdrop-blur-sm border-b border-gray-800 z-50">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                   <div className="flex items-center justify-between h-16">
+                    {/* Logo on the left */}
                     <div className="flex items-center">
                       <span className="text-xl font-bold"><a href="/">EulerSwap</a></span>
                     </div>
-                    <div className="hidden md:block">
-                      <div className="flex items-center space-x-6">
-                        {/* Navigation Buttons */}
-                        <a href="/graphql" className="text-gray-300 hover:text-orange-300 transition-colors px-3 py-2 rounded-md text-sm font-medium">
-                          GraphQL
-                        </a>
-                        <a href="/pyth" className="text-gray-300 hover:text-orange-300 transition-colors px-3 py-2 rounded-md text-sm font-medium">
-                          Pyth
-                        </a>
-                        <a href="/verified-vault" className="text-gray-300 hover:text-orange-300 transition-colors px-3 py-2 rounded-md text-sm font-medium">
-                          Verified Vault
-                        </a>
-                        <a href="/offchain-price" className="text-gray-300 hover:text-orange-300 transition-colors px-3 py-2 rounded-md text-sm font-medium">
-                          Offchain
-                        </a>
-                        
-                        <ConnectButton />
-                      </div>
+                    
+                    {/* Navigation Links in center */}
+                    <div className="hidden md:flex items-center space-x-8">
+                      <a href="/graphql" className="text-gray-300 hover:text-orange-300 transition-colors px-3 py-2 text-sm font-medium hover:underline">
+                        GraphQL
+                      </a>
+                      <a href="/pyth" className="text-gray-300 hover:text-orange-300 transition-colors px-3 py-2 text-sm font-medium hover:underline">
+                        Pyth
+                      </a>
+                      <a href="/verified-vault" className="text-gray-300 hover:text-orange-300 transition-colors px-3 py-2 text-sm font-medium hover:underline">
+                        Verified Vault
+                      </a>
+                      <a href="/offchain-price" className="text-gray-300 hover:text-orange-300 transition-colors px-3 py-2 text-sm font-medium hover:underline">
+                        Offchain
+                      </a>
+                    </div>
+                    
+                    {/* Connect Button on the right */}
+                    <div className="flex items-center">
+                      <ConnectButton />
                     </div>
                   </div>
                 </div>
