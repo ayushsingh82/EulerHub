@@ -1,4 +1,4 @@
-import Image from "next/image";
+
 
 export default function Home() {
   return (
@@ -41,7 +41,7 @@ export default function Home() {
         <div className="text-center mb-12">
           <h2 className="text-3xl font-bold mb-4">🎯 What We Do</h2>
           <p className="text-xl text-gray-400 mb-8">
-            "Your Complete Gateway to EulerSwap Ecosystem Data"
+            &quot;Your Complete Gateway to EulerSwap Ecosystem Data&quot;
           </p>
           <p className="text-gray-400 max-w-3xl mx-auto">
             We provide comprehensive data querying capabilities for the entire EulerSwap ecosystem, 
@@ -55,8 +55,8 @@ export default function Home() {
             "Price feeds from Pyth Network and off-chain sources",
             "GraphQL API for complex data queries and analytics"
           ].map((feature, index) => (
-            <div key={index} className="bg-black p-6 rounded-lg shadow-lg border-2 border-orange-300">
-              <p className="text-white">✅ {feature}</p>
+            <div key={index} className="bg-black p-6 rounded-lg shadow-lg border-2 border-orange-300 hover:bg-orange-300 hover:text-black transition-all duration-300 transform hover:scale-105 cursor-pointer">
+              <p className="text-orange-300 hover:text-black transition-colors duration-300">✅ {feature}</p>
             </div>
           ))}
         </div>

@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 
 // Sepolia testnet configuration
-const SEPOLIA_RPC_URL = 'https://sepolia.infura.io/v3/<>INFURA';
+// const SEPOLIA_RPC_URL = 'https://sepolia.infura.io/v3/<>INFURA';
 
 // Uniswap V2 Router on Sepolia
 const UNISWAP_V2_ROUTER = '0xC532a74256D3Db42D0Bf7a0400fEFDbad7694008';

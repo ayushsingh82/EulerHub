@@ -7,8 +7,6 @@ import {
   fetchMultipleAssetPrices,
   fetchCommonAssetPrices,
   formatPriceData,
-  calculatePriceDifference,
-  COMMON_ASSETS,
   NETWORKS
 } from '@/utils/eulerPriceUtils'
 
@@ -17,7 +15,7 @@ const OffchainPricePage = () => {
   
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [priceData, setPriceData] = useState<any[]>([])
+  const [priceData, setPriceData] = useState<unknown[]>([])
   const [customAssetAddress, setCustomAssetAddress] = useState('')
   const [multipleAssetAddresses, setMultipleAssetAddresses] = useState('')
   const [selectedNetwork, setSelectedNetwork] = useState(chainId || 1)

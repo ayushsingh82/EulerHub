@@ -11,10 +11,10 @@ const PythPage = () => {
   const chainId = useChainId()
   
   const [loading, setLoading] = useState(false)
-  const [accountLiquidity, setAccountLiquidity] = useState<any>(null)
+  const [accountLiquidity, setAccountLiquidity] = useState<unknown>(null)
   const [error, setError] = useState<string | null>(null)
   const [vaultAddress, setVaultAddress] = useState('')
-  const [priceData, setPriceData] = useState<any>(null)
+  const [priceData, setPriceData] = useState<unknown>(null)
 
   const handleFetchPriceData = async () => {
     setLoading(true)
@@ -67,9 +67,9 @@ const PythPage = () => {
             <h1 className="text-2xl md:text-5xl font-bold text-orange-300 mb-6">
               Pyth Price Feeds
             </h1>
-            <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Real-time price data integration with batch simulation for DeFi protocols
-            </p>
+                          <p className="text-xl text-gray-300 max-w-3xl mx-auto">
+                Real-time price data integration with batch simulation for DeFi protocols
+              </p>
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Image from "next/image";
+
 import { ethers } from 'ethers';
 import { ModularUniswapV2Swapper, SEPOLIA_TOKENS } from './swapUtils';
 import { useAccount } from 'wagmi';

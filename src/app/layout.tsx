@@ -1,6 +1,7 @@
 'use client';
 
 import { Inter } from "next/font/google";
+import Link from "next/link";
 import "./globals.css";
 import { ConnectButton } from '@rainbow-me/rainbowkit';
 
@@ -157,7 +158,7 @@ export default function RootLayout({
                   <div className="flex items-center justify-between h-16">
                     {/* Logo on the left */}
                     <div className="flex items-center">
-                      <span className="text-xl font-bold"><a href="/">EulerHub</a></span>
+                      <span className="text-xl font-bold"><Link href="/">EulerHub</Link></span>
                     </div>
                     
                     {/* Navigation Links in center */}

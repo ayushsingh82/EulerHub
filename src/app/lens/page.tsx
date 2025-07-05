@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { useReadContract, useAccount } from 'wagmi';
+import { useReadContract } from 'wagmi';
 import { lensAddresses } from './lensAddresses';
 import UtilsLensABI from './UtilsLens.json';
 import VaultLensABI from './VaultLens.json';
@@ -16,7 +16,7 @@ import {
 } from 'wagmi/chains';
 
 interface LensData {
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export default function LensPage() {
@@ -28,7 +28,7 @@ export default function LensPage() {
   const [data, setData] = useState<LensData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  const { address } = useAccount();
+
 
   const chains = [
     { id: 'mainnet', name: 'Ethereum Mainnet', chain: mainnet },
@@ -68,14 +68,11 @@ export default function LensPage() {
     return chains.find(chain => chain.id === selectedChain)?.chain;
   };
 
-  const getSelectedLensConfig = () => {
-    return lensTypes.find(lens => lens.id === selectedLens);
-  };
+
 
   // Contract read hooks
   const lensAddress = getLensAddress();
   const selectedChainConfig = getSelectedChainConfig();
-  const selectedLensConfig = getSelectedLensConfig();
 
   // Utils Lens queries
   const { data: apys, error: apysError } = useReadContract({
@@ -180,13 +177,13 @@ export default function LensPage() {
            queryData = {
              ...queryData,
              apys: apys ? {
-               borrowAPY: (apys as any)[0]?.toString(),
-               supplyAPY: (apys as any)[1]?.toString(),
+               borrowAPY: (apys as unknown[])[0]?.toString(),
+               supplyAPY: (apys as unknown[])[1]?.toString(),
              } : null,
              assetPriceInfo: assetPriceInfo ? {
-               price: (assetPriceInfo as any).price?.toString(),
-               timestamp: (assetPriceInfo as any).timestamp?.toString(),
-               oracleAddress: (assetPriceInfo as any).oracleAddress,
+               price: (assetPriceInfo as { price?: unknown; timestamp?: unknown; oracleAddress?: unknown }).price?.toString(),
+               timestamp: (assetPriceInfo as { price?: unknown; timestamp?: unknown; oracleAddress?: unknown }).timestamp?.toString(),
+               oracleAddress: (assetPriceInfo as { price?: unknown; timestamp?: unknown; oracleAddress?: unknown }).oracleAddress,
              } : null,
            };
            break;
@@ -198,20 +195,20 @@ export default function LensPage() {
            queryData = {
              ...queryData,
              vaultInfo: vaultInfo ? {
-               name: (vaultInfo as any).name,
-               symbol: (vaultInfo as any).symbol,
-               decimals: (vaultInfo as any).decimals?.toString(),
-               totalAssets: (vaultInfo as any).totalAssets?.toString(),
-               totalBorrows: (vaultInfo as any).totalBorrows?.toString(),
-               totalShares: (vaultInfo as any).totalShares?.toString(),
+               name: (vaultInfo as { name?: unknown; symbol?: unknown; decimals?: unknown; totalAssets?: unknown; totalBorrows?: unknown; totalShares?: unknown }).name,
+               symbol: (vaultInfo as { name?: unknown; symbol?: unknown; decimals?: unknown; totalAssets?: unknown; totalBorrows?: unknown; totalShares?: unknown }).symbol,
+               decimals: (vaultInfo as { name?: unknown; symbol?: unknown; decimals?: unknown; totalAssets?: unknown; totalBorrows?: unknown; totalShares?: unknown }).decimals?.toString(),
+               totalAssets: (vaultInfo as { name?: unknown; symbol?: unknown; decimals?: unknown; totalAssets?: unknown; totalBorrows?: unknown; totalShares?: unknown }).totalAssets?.toString(),
+               totalBorrows: (vaultInfo as { name?: unknown; symbol?: unknown; decimals?: unknown; totalAssets?: unknown; totalBorrows?: unknown; totalShares?: unknown }).totalBorrows?.toString(),
+               totalShares: (vaultInfo as { name?: unknown; symbol?: unknown; decimals?: unknown; totalAssets?: unknown; totalBorrows?: unknown; totalShares?: unknown }).totalShares?.toString(),
              } : null,
-             collateralInfo: collateralInfo ? (collateralInfo as any[]).map((collateral: any) => ({
-               collateral: collateral.collateral,
-               borrowLTV: collateral.borrowLTV?.toString(),
-               liquidationLTV: collateral.liquidationLTV?.toString(),
-               initialLiquidationLTV: collateral.initialLiquidationLTV?.toString(),
-               targetTimestamp: collateral.targetTimestamp?.toString(),
-               rampDuration: collateral.rampDuration?.toString(),
+             collateralInfo: collateralInfo ? (collateralInfo as unknown[]).map((collateral: unknown) => ({
+               collateral: (collateral as { collateral?: unknown; borrowLTV?: unknown; liquidationLTV?: unknown; initialLiquidationLTV?: unknown; targetTimestamp?: unknown; rampDuration?: unknown }).collateral,
+               borrowLTV: (collateral as { collateral?: unknown; borrowLTV?: unknown; liquidationLTV?: unknown; initialLiquidationLTV?: unknown; targetTimestamp?: unknown; rampDuration?: unknown }).borrowLTV?.toString(),
+               liquidationLTV: (collateral as { collateral?: unknown; borrowLTV?: unknown; liquidationLTV?: unknown; initialLiquidationLTV?: unknown; targetTimestamp?: unknown; rampDuration?: unknown }).liquidationLTV?.toString(),
+               initialLiquidationLTV: (collateral as { collateral?: unknown; borrowLTV?: unknown; liquidationLTV?: unknown; initialLiquidationLTV?: unknown; targetTimestamp?: unknown; rampDuration?: unknown }).initialLiquidationLTV?.toString(),
+               targetTimestamp: (collateral as { collateral?: unknown; borrowLTV?: unknown; liquidationLTV?: unknown; initialLiquidationLTV?: unknown; targetTimestamp?: unknown; rampDuration?: unknown }).targetTimestamp?.toString(),
+               rampDuration: (collateral as { collateral?: unknown; borrowLTV?: unknown; liquidationLTV?: unknown; initialLiquidationLTV?: unknown; targetTimestamp?: unknown; rampDuration?: unknown }).rampDuration?.toString(),
              })) : null,
            };
            break;
@@ -223,20 +220,20 @@ export default function LensPage() {
            queryData = {
              ...queryData,
              earnVaultInfo: earnVaultInfo ? {
-               timestamp: (earnVaultInfo as any).timestamp?.toString(),
-               vaultName: (earnVaultInfo as any).vaultName,
-               vaultSymbol: (earnVaultInfo as any).vaultSymbol,
-               vaultDecimals: (earnVaultInfo as any).vaultDecimals?.toString(),
-               asset: (earnVaultInfo as any).asset,
-               assetName: (earnVaultInfo as any).assetName,
-               assetSymbol: (earnVaultInfo as any).assetSymbol,
+               timestamp: (earnVaultInfo as { timestamp?: unknown; vaultName?: unknown; vaultSymbol?: unknown; vaultDecimals?: unknown; asset?: unknown; assetName?: unknown; assetSymbol?: unknown }).timestamp?.toString(),
+               vaultName: (earnVaultInfo as { timestamp?: unknown; vaultName?: unknown; vaultSymbol?: unknown; vaultDecimals?: unknown; asset?: unknown; assetName?: unknown; assetSymbol?: unknown }).vaultName,
+               vaultSymbol: (earnVaultInfo as { timestamp?: unknown; vaultName?: unknown; vaultSymbol?: unknown; vaultDecimals?: unknown; asset?: unknown; assetName?: unknown; assetSymbol?: unknown }).vaultSymbol,
+               vaultDecimals: (earnVaultInfo as { timestamp?: unknown; vaultName?: unknown; vaultSymbol?: unknown; vaultDecimals?: unknown; asset?: unknown; assetName?: unknown; assetSymbol?: unknown }).vaultDecimals?.toString(),
+               asset: (earnVaultInfo as { timestamp?: unknown; vaultName?: unknown; vaultSymbol?: unknown; vaultDecimals?: unknown; asset?: unknown; assetName?: unknown; assetSymbol?: unknown }).asset,
+               assetName: (earnVaultInfo as { timestamp?: unknown; vaultName?: unknown; vaultSymbol?: unknown; vaultDecimals?: unknown; asset?: unknown; assetName?: unknown; assetSymbol?: unknown }).assetName,
+               assetSymbol: (earnVaultInfo as { timestamp?: unknown; vaultName?: unknown; vaultSymbol?: unknown; vaultDecimals?: unknown; asset?: unknown; assetName?: unknown; assetSymbol?: unknown }).assetSymbol,
              } : null,
              accessControlInfo: accessControlInfo ? {
-               defaultAdmins: (accessControlInfo as any).defaultAdmins,
-               guardianAdmins: (accessControlInfo as any).guardianAdmins,
-               strategyOperatorAdmins: (accessControlInfo as any).strategyOperatorAdmins,
-               guardians: (accessControlInfo as any).guardians,
-               strategyOperators: (accessControlInfo as any).strategyOperators,
+               defaultAdmins: (accessControlInfo as { defaultAdmins?: unknown; guardianAdmins?: unknown; strategyOperatorAdmins?: unknown; guardians?: unknown; strategyOperators?: unknown }).defaultAdmins,
+               guardianAdmins: (accessControlInfo as { defaultAdmins?: unknown; guardianAdmins?: unknown; strategyOperatorAdmins?: unknown; guardians?: unknown; strategyOperators?: unknown }).guardianAdmins,
+               strategyOperatorAdmins: (accessControlInfo as { defaultAdmins?: unknown; guardianAdmins?: unknown; strategyOperatorAdmins?: unknown; guardians?: unknown; strategyOperators?: unknown }).strategyOperatorAdmins,
+               guardians: (accessControlInfo as { defaultAdmins?: unknown; guardianAdmins?: unknown; strategyOperatorAdmins?: unknown; guardians?: unknown; strategyOperators?: unknown }).guardians,
+               strategyOperators: (accessControlInfo as { defaultAdmins?: unknown; guardianAdmins?: unknown; strategyOperatorAdmins?: unknown; guardians?: unknown; strategyOperators?: unknown }).strategyOperators,
              } : null,
            };
            break;

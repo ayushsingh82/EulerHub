@@ -22,7 +22,7 @@ const GraphQLPage = () => {
   const [queryMode, setQueryMode] = useState<'list' | 'single'>('list');
   const [inputId, setInputId] = useState('');
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<any>(null);
+  const [data, setData] = useState<{ vaultStatuses?: VaultStatus[]; vaultStatus?: VaultStatus; eulerVaults?: EulerVault[]; eulerVault?: EulerVault; borrows?: Borrow[]; borrow?: Borrow } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const networks = Object.keys(GRAPHQL_ENDPOINTS) as Network[];
@@ -147,7 +147,7 @@ const GraphQLPage = () => {
     if (queryType === 'vaultStatus') {
       const vaults = queryMode === 'list' ? data.vaultStatuses : (data.vaultStatus ? [data.vaultStatus] : []);
       console.log('Vault status data:', vaults);
-      if (!vaults || vaults.length === 0 || vaults.every((v: VaultStatus | null) => !v)) {
+      if (!vaults || vaults.length === 0 || vaults.every((v: unknown) => !v)) {
         return (
           <div className="text-center py-8 text-gray-400">
             <p>No vault status data found for this query</p>
@@ -165,7 +165,7 @@ const GraphQLPage = () => {
     } else if (queryType === 'eulerVault') {
       const vaults = queryMode === 'list' ? data.eulerVaults : (data.eulerVault ? [data.eulerVault] : []);
       console.log('Euler vault data:', vaults);
-      if (!vaults || vaults.length === 0 || vaults.every((v: EulerVault | null) => !v)) {
+      if (!vaults || vaults.length === 0 || vaults.every((v: unknown) => !v)) {
         return (
           <div className="text-center py-8 text-gray-400">
             <p>No Euler vault data found for this query</p>
@@ -183,7 +183,7 @@ const GraphQLPage = () => {
     } else if (queryType === 'borrow') {
       const borrows = queryMode === 'list' ? data.borrows : (data.borrow ? [data.borrow] : []);
       console.log('Borrow data:', borrows);
-      if (!borrows || borrows.length === 0 || borrows.every((b: Borrow | null) => !b)) {
+      if (!borrows || borrows.length === 0 || borrows.every((b: unknown) => !b)) {
         return (
           <div className="text-center py-8 text-gray-400">
             <p>No borrow data found for this query</p>
@@ -245,7 +245,7 @@ const GraphQLPage = () => {
               </label>
               <select
                 value={queryType}
-                onChange={(e) => setQueryType(e.target.value as any)}
+                onChange={(e) => setQueryType(e.target.value as 'vaultStatus' | 'eulerVault' | 'borrow')}
                 className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="vaultStatus">Vault Status</option>

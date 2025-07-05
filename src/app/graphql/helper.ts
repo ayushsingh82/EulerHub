@@ -109,14 +109,14 @@ export interface Borrow {
 
 export interface GraphQLResponse<T> {
   data: T;
-  errors?: any[];
+  errors?: unknown[];
 }
 
 // Utility function to execute GraphQL queries
 export async function executeQuery<T>(
   network: Network,
   query: string,
-  variables?: Record<string, any>
+  variables?: Record<string, unknown>
 ): Promise<T> {
   const endpoint = GRAPHQL_ENDPOINTS[network];
   
