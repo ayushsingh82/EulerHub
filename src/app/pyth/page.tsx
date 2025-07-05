@@ -1,15 +1,147 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
-import { useAccount, usePublicClient, useChainId } from 'wagmi'
+import { useAccount, usePublicClient, useWalletClient, useChainId } from 'wagmi'
 import { simulateBatchWithPyth, fetchPythPriceData, AccountLiquidity } from '@/utils/pythUtils'
-import { formatEther } from 'viem'
+import { formatEther, parseEther, encodeFunctionData, decodeFunctionResult } from 'viem'
 import { getContractAddresses } from '@/config/contracts'
+
+// Pyth Oracle ABI - Basic interface for price updates
+const pythAbi = [
+  {
+    inputs: [
+      {
+        internalType: 'bytes[]',
+        name: 'updateData',
+        type: 'bytes[]'
+      }
+    ],
+    name: 'updatePriceFeeds',
+    outputs: [],
+    stateMutability: 'payable',
+    type: 'function'
+  }
+] as const
+
+// Example Vault ABI for borrow operations
+const vaultAbi = [
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'amount',
+        type: 'uint256'
+      },
+      {
+        internalType: 'address',
+        name: 'receiver',
+        type: 'address'
+      }
+    ],
+    name: 'borrow',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function'
+  }
+] as const
+
+// EVC ABI - For batch operations
+const evcAbi = [
+  {
+    inputs: [
+      {
+        components: [
+          {
+            internalType: 'address',
+            name: 'targetContract',
+            type: 'address'
+          },
+          {
+            internalType: 'address',
+            name: 'onBehalfOfAccount',
+            type: 'address'
+          },
+          {
+            internalType: 'uint256',
+            name: 'value',
+            type: 'uint256'
+          },
+          {
+            internalType: 'bytes',
+            name: 'data',
+            type: 'bytes'
+          }
+        ],
+        internalType: 'struct SimulationItem[]',
+        name: 'items',
+        type: 'tuple[]'
+      }
+    ],
+    name: 'batch',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function'
+  },
+  {
+    inputs: [
+      {
+        components: [
+          {
+            internalType: 'address',
+            name: 'targetContract',
+            type: 'address'
+          },
+          {
+            internalType: 'address',
+            name: 'onBehalfOfAccount',
+            type: 'address'
+          },
+          {
+            internalType: 'uint256',
+            name: 'value',
+            type: 'uint256'
+          },
+          {
+            internalType: 'bytes',
+            name: 'data',
+            type: 'bytes'
+          }
+        ],
+        internalType: 'struct SimulationItem[]',
+        name: 'items',
+        type: 'tuple[]'
+      }
+    ],
+    name: 'batchSimulation',
+    outputs: [
+      {
+        components: [
+          {
+            internalType: 'bool',
+            name: 'success',
+            type: 'bool'
+          },
+          {
+            internalType: 'bytes',
+            name: 'result',
+            type: 'bytes'
+          }
+        ],
+        internalType: 'struct SimulationResult[]',
+        name: '',
+        type: 'tuple[]'
+      }
+    ],
+    stateMutability: 'nonpayable',
+    type: 'function'
+  }
+] as const
 
 const PythPage = () => {
   const [mounted, setMounted] = useState(false)
   const { address, isConnected } = useAccount()
   const publicClient = usePublicClient()
+  const walletClient = useWalletClient()
   const chainId = useChainId()
   
   const [loading, setLoading] = useState(false)
@@ -17,11 +149,21 @@ const PythPage = () => {
   const [error, setError] = useState<string | null>(null)
   const [vaultAddress, setVaultAddress] = useState('')
   const [priceData, setPriceData] = useState<Record<string, unknown> | null>(null)
+  const [borrowAmount, setBorrowAmount] = useState('')
+  const [receiverAddress, setReceiverAddress] = useState('')
+  const [transactionHash, setTransactionHash] = useState<string | null>(null)
   const [contractStatus, setContractStatus] = useState<{
     pythOracle: boolean
     lens: boolean
     evc: boolean
   }>({ pythOracle: false, lens: false, evc: false })
+
+  // Price feed IDs
+  const PRICE_FEED_IDS = {
+    ETH_USD: '0xff61491a931112ddf1bd8147cd1b641375f79f5825126d665480874634fd0ace',
+    BTC_USD: '0xe62df6c8b4c85fe1a67db44dc12de5db330f7ac66b72dc658afedf0f4a415b43',
+    USDC_USD: '0xeaa020c61cc479712813461ce153894a96a6c00b21ed0cfc2798d1f9a9e9c94a',
+  }
 
   // Ensure component only renders on client
   useEffect(() => {
@@ -90,6 +232,88 @@ const PythPage = () => {
     }
   }
 
+  const handleBorrowOperation = async () => {
+    if (!isConnected || !address || !walletClient.data) {
+      setError('Please connect your wallet first')
+      return
+    }
+
+    if (!vaultAddress) {
+      setError('Please enter a vault address')
+      return
+    }
+
+    if (!borrowAmount || parseFloat(borrowAmount) <= 0) {
+      setError('Please enter a valid borrow amount')
+      return
+    }
+
+    if (!receiverAddress) {
+      setError('Please enter a receiver address')
+      return
+    }
+
+    if (!contractStatus.pythOracle || !contractStatus.evc) {
+      setError('Contract addresses not configured for this network. Please check the configuration.')
+      return
+    }
+
+    setLoading(true)
+    setError(null)
+    setTransactionHash(null)
+
+    try {
+      const addresses = getContractAddresses(chainId)
+      
+      // 1. Fetch price updates from Pyth API
+      const priceIds = [PRICE_FEED_IDS.ETH_USD]
+      const pythApiUrl = 'https://hermes.pyth.network/v2/updates/price/latest'
+      const response = await fetch(`${pythApiUrl}?ids[]=${priceIds.join('&ids[]=')}&encoding=hex`)
+      const data = await response.json()
+      const priceUpdateData = data.binary.data
+
+      // 2. Prepare batch items
+      const batchItems = [
+        // First: Update Pyth prices
+        {
+          targetContract: addresses.pythOracle as `0x${string}`,
+          onBehalfOfAccount: address as `0x${string}`,
+          value: 0n,
+          data: encodeFunctionData({
+            abi: pythAbi,
+            functionName: 'updatePriceFeeds',
+            args: [priceUpdateData]
+          })
+        },
+        // Then: Borrow operation
+        {
+          targetContract: vaultAddress as `0x${string}`,
+          onBehalfOfAccount: address as `0x${string}`,
+          value: 0n,
+          data: encodeFunctionData({
+            abi: vaultAbi,
+            functionName: 'borrow',
+            args: [parseEther(borrowAmount), receiverAddress as `0x${string}`]
+          })
+        }
+      ]
+
+      // 3. Execute the batch
+      const hash = await walletClient.data.writeContract({
+        address: addresses.evc as `0x${string}`,
+        abi: evcAbi,
+        functionName: 'batch',
+        args: [batchItems]
+      })
+
+      setTransactionHash(hash)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to execute borrow operation')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   // Don't render until mounted on client
   if (!mounted) {
     return (
@@ -115,7 +339,7 @@ const PythPage = () => {
               Pyth Price Feeds
             </h1>
             <p className="text-xl text-gray-300 max-w-3xl mx-auto">
-              Real-time price data integration with batch simulation for DeFi protocols
+              Real-time price data integration with batch simulation and state-changing operations for DeFi protocols
             </p>
           </div>
         </div>
@@ -191,9 +415,76 @@ const PythPage = () => {
           )}
         </div>
 
-        {/* Batch Simulation Section */}
+        {/* State-Changing Operations */}
         <div className="bg-gray-900 rounded-lg p-6 mb-8">
-          <h2 className="text-2xl font-bold text-white mb-4">Batch Simulation</h2>
+          <h2 className="text-2xl font-bold text-white mb-4">State-Changing Operations</h2>
+          <p className="text-gray-300 mb-4">Execute transactions with Pyth price updates in a single batch</p>
+          
+          <div className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Vault Address
+              </label>
+              <input
+                type="text"
+                value={vaultAddress}
+                onChange={(e) => setVaultAddress(e.target.value)}
+                placeholder="0x..."
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Borrow Amount (ETH)
+              </label>
+              <input
+                type="number"
+                value={borrowAmount}
+                onChange={(e) => setBorrowAmount(e.target.value)}
+                placeholder="1.0"
+                step="0.01"
+                min="0"
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                Receiver Address
+              </label>
+              <input
+                type="text"
+                value={receiverAddress}
+                onChange={(e) => setReceiverAddress(e.target.value)}
+                placeholder="0x..."
+                className="w-full px-3 py-2 bg-gray-800 border border-gray-700 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+            
+            <button
+              onClick={handleBorrowOperation}
+              disabled={loading || !isConnected || !vaultAddress || !borrowAmount || !receiverAddress || !contractStatus.pythOracle || !contractStatus.evc}
+              className="bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
+            >
+              {loading ? 'Executing...' : 'Execute Borrow with Price Update'}
+            </button>
+
+            {transactionHash && (
+              <div className="mt-4 p-4 bg-green-900/20 border border-green-500 rounded-lg">
+                <h3 className="text-lg font-semibold text-green-400 mb-2">Transaction Successful!</h3>
+                <p className="text-green-300 text-sm">
+                  Hash: <span className="font-mono">{transactionHash}</span>
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Data Querying Section */}
+        <div className="bg-gray-900 rounded-lg p-6 mb-8">
+          <h2 className="text-2xl font-bold text-white mb-4">Data Querying</h2>
+          <p className="text-gray-300 mb-4">Simulate operations to query account data with fresh price updates</p>
           
           <div className="space-y-4">
             <div>
@@ -214,7 +505,7 @@ const PythPage = () => {
               disabled={loading || !isConnected || !vaultAddress || !contractStatus.pythOracle || !contractStatus.lens || !contractStatus.evc}
               className="bg-green-600 hover:bg-green-700 disabled:bg-gray-600 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
             >
-              {loading ? 'Simulating...' : 'Simulate Batch'}
+              {loading ? 'Simulating...' : 'Simulate Batch Query'}
             </button>
           </div>
 
@@ -271,8 +562,8 @@ const PythPage = () => {
                 2
               </div>
               <div>
-                <h3 className="font-semibold text-white">Prepare Simulation</h3>
-                <p>Create a batch simulation with price update and account liquidity query</p>
+                <h3 className="font-semibold text-white">Prepare Batch</h3>
+                <p>Create a batch with price update and your intended operation (borrow, query, etc.)</p>
               </div>
             </div>
             <div className="flex items-start space-x-3">
@@ -280,8 +571,8 @@ const PythPage = () => {
                 3
               </div>
               <div>
-                <h3 className="font-semibold text-white">Execute & Decode</h3>
-                <p>Simulate the batch transaction and decode the account liquidity results</p>
+                <h3 className="font-semibold text-white">Execute or Simulate</h3>
+                <p>Execute the batch for state changes or simulate for data queries</p>
               </div>
             </div>
           </div>

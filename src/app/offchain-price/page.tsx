@@ -15,7 +15,15 @@ const OffchainPricePage = () => {
   
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
-  const [priceData, setPriceData] = useState<unknown[]>([])
+  const [priceData, setPriceData] = useState<Array<{
+    address: string
+    symbol: string
+    price: number
+    priceFormatted: string
+    timestamp: number
+    timestampFormatted: string
+    source: string
+  }>>([])
   const [customAssetAddress, setCustomAssetAddress] = useState('')
   const [multipleAssetAddresses, setMultipleAssetAddresses] = useState('')
   const [selectedNetwork, setSelectedNetwork] = useState(chainId || 1)
@@ -142,7 +150,6 @@ const OffchainPricePage = () => {
               className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
             >
               <option value={1}>Ethereum Mainnet</option>
-              <option value={11155111}>Sepolia Testnet</option>
             </select>
             <span className="text-sm text-gray-400">
               Current: {getNetworkName(selectedNetwork)}
