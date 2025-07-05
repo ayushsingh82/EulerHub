@@ -27,7 +27,7 @@ import {
 } from "@tanstack/react-query";
 
 const config = getDefaultConfig({
-  appName: 'EulerSwap Rebalancing Protocol',
+  appName: 'EulerHub ',
   projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || 'YOUR_PROJECT_ID',
   chains: [sepolia, mainnet, polygon, optimism, arbitrum, base],
   ssr: true,
@@ -44,7 +44,7 @@ const Footer = () => {
           {/* Brand Section */}
           <div className="col-span-1 md:col-span-2">
             <div className="flex items-center mb-4">
-              <span className="text-2xl font-bold text-orange-300">EulerSwap</span>
+              <span className="text-2xl font-bold text-orange-300">EulerHub</span>
             </div>
             <p className="text-gray-400 mb-4 max-w-md">
               Advanced DeFi portfolio rebalancing protocol built on Euler Finance. 
@@ -121,7 +121,7 @@ const Footer = () => {
         <div className="border-t border-gray-800 mt-8 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="text-gray-400 text-sm">
-              © 2024 EulerSwap. All rights reserved.
+              © 2024 EulerHub. All rights reserved.
             </div>
             <div className="flex space-x-6 mt-4 md:mt-0">
               <a href="#" className="text-gray-400 hover:text-orange-300 text-sm transition-colors">
@@ -157,7 +157,7 @@ export default function RootLayout({
                   <div className="flex items-center justify-between h-16">
                     {/* Logo on the left */}
                     <div className="flex items-center">
-                      <span className="text-xl font-bold"><a href="/">EulerSwap</a></span>
+                      <span className="text-xl font-bold"><a href="/">EulerHub</a></span>
                     </div>
                     
                     {/* Navigation Links in center */}

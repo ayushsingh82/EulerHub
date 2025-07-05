@@ -1,7 +1,19 @@
 'use client';
 
 import { useState } from 'react';
+import { useReadContract, useAccount } from 'wagmi';
 import { lensAddresses } from './lensAddresses';
+import UtilsLensABI from './UtilsLens.json';
+import VaultLensABI from './VaultLens.json';
+import EulerEarnVaultLensABI from './EulerEarnVaultLens.json';
+import { 
+  mainnet, 
+  polygon, 
+  optimism, 
+  arbitrum, 
+  base, 
+  bsc 
+} from 'wagmi/chains';
 
 interface LensData {
   [key: string]: any;
@@ -16,34 +28,123 @@ export default function LensPage() {
   const [data, setData] = useState<LensData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  const { address } = useAccount();
+
   const chains = [
-    { id: 'mainnet', name: 'Ethereum Mainnet' },
-    { id: 'bnbMainnet', name: 'BNB Chain' },
-    { id: 'unichain', name: 'UniChain' },
-    { id: 'baseMainnet', name: 'Base' },
+    { id: 'mainnet', name: 'Ethereum Mainnet', chain: mainnet },
+    { id: 'bnbMainnet', name: 'BNB Chain', chain: bsc },
+    { id: 'polygon', name: 'Polygon', chain: polygon },
+    { id: 'optimism', name: 'Optimism', chain: optimism },
+    { id: 'arbitrum', name: 'Arbitrum', chain: arbitrum },
+    { id: 'baseMainnet', name: 'Base', chain: base },
   ];
 
   const lensTypes = [
     { 
       id: 'utilsLens', 
       name: 'Utils Lens', 
-      description: 'Utility queries for vaults and tokens (ERC-4626 info, APYs, balances, price lookups, liquidation time)' 
+      description: 'Utility queries for vaults and tokens (ERC-4626 info, APYs, balances, price lookups, liquidation time)',
+      abi: UtilsLensABI
     },
     { 
       id: 'eulerEarnVaultLens', 
       name: 'Euler Earn Vault Lens', 
-      description: 'Specialized lens for Euler Earn vaults (strategy allocations, performance, fees, rewards)' 
+      description: 'Specialized lens for Euler Earn vaults (strategy allocations, performance, fees, rewards)',
+      abi: EulerEarnVaultLensABI
     },
     { 
       id: 'vaultLens', 
       name: 'Vault Lens', 
-      description: 'Detailed vault information (configuration, assets, borrows, collateral, LTVs, oracle data)' 
+      description: 'Detailed vault information (configuration, assets, borrows, collateral, LTVs, oracle data)',
+      abi: VaultLensABI
     },
   ];
 
   const getLensAddress = () => {
     return lensAddresses[selectedChain as keyof typeof lensAddresses]?.[selectedLens as keyof typeof lensAddresses.mainnet];
   };
+
+  const getSelectedChainConfig = () => {
+    return chains.find(chain => chain.id === selectedChain)?.chain;
+  };
+
+  const getSelectedLensConfig = () => {
+    return lensTypes.find(lens => lens.id === selectedLens);
+  };
+
+  // Contract read hooks
+  const lensAddress = getLensAddress();
+  const selectedChainConfig = getSelectedChainConfig();
+  const selectedLensConfig = getSelectedLensConfig();
+
+  // Utils Lens queries
+  const { data: apys, error: apysError } = useReadContract({
+    address: lensAddress as `0x${string}`,
+    abi: UtilsLensABI,
+    functionName: 'getAPYs',
+    args: vaultAddress ? [vaultAddress as `0x${string}`] : undefined,
+    chainId: selectedChainConfig?.id,
+    query: {
+      enabled: selectedLens === 'utilsLens' && !!vaultAddress && !!lensAddress,
+    },
+  });
+
+  const { data: assetPriceInfo, error: priceError } = useReadContract({
+    address: lensAddress as `0x${string}`,
+    abi: UtilsLensABI,
+    functionName: 'getAssetPriceInfo',
+    args: tokenAddress && vaultAddress ? [tokenAddress as `0x${string}`, vaultAddress as `0x${string}`] : undefined,
+    chainId: selectedChainConfig?.id,
+    query: {
+      enabled: selectedLens === 'utilsLens' && !!tokenAddress && !!vaultAddress && !!lensAddress,
+    },
+  });
+
+  // Vault Lens queries
+  const { data: vaultInfo, error: vaultInfoError } = useReadContract({
+    address: lensAddress as `0x${string}`,
+    abi: VaultLensABI,
+    functionName: 'getVaultInfo',
+    args: vaultAddress ? [vaultAddress as `0x${string}`] : undefined,
+    chainId: selectedChainConfig?.id,
+    query: {
+      enabled: selectedLens === 'vaultLens' && !!vaultAddress && !!lensAddress,
+    },
+  });
+
+  const { data: collateralInfo, error: collateralError } = useReadContract({
+    address: lensAddress as `0x${string}`,
+    abi: VaultLensABI,
+    functionName: 'getRecognizedCollateralsLTVInfo',
+    args: vaultAddress ? [vaultAddress as `0x${string}`] : undefined,
+    chainId: selectedChainConfig?.id,
+    query: {
+      enabled: selectedLens === 'vaultLens' && !!vaultAddress && !!lensAddress,
+    },
+  });
+
+  // Euler Earn Vault Lens queries
+  const { data: earnVaultInfo, error: earnVaultError } = useReadContract({
+    address: lensAddress as `0x${string}`,
+    abi: EulerEarnVaultLensABI,
+    functionName: 'getVaultInfoFull',
+    args: vaultAddress ? [vaultAddress as `0x${string}`] : undefined,
+    chainId: selectedChainConfig?.id,
+    query: {
+      enabled: selectedLens === 'eulerEarnVaultLens' && !!vaultAddress && !!lensAddress,
+    },
+  });
+
+  const { data: accessControlInfo, error: accessControlError } = useReadContract({
+    address: lensAddress as `0x${string}`,
+    abi: EulerEarnVaultLensABI,
+    functionName: 'getVaultAccessControlInfo',
+    args: vaultAddress ? [vaultAddress as `0x${string}`] : undefined,
+    chainId: selectedChainConfig?.id,
+    query: {
+      enabled: selectedLens === 'eulerEarnVaultLens' && !!vaultAddress && !!lensAddress,
+    },
+  });
 
   const handleQuery = async () => {
     setLoading(true);
@@ -56,132 +157,96 @@ export default function LensPage() {
         throw new Error('Invalid lens address for selected chain');
       }
 
-      // Simulate API call - replace with actual contract calls
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Mock data based on lens type
-      const mockData = generateMockData(selectedLens, vaultAddress, tokenAddress);
-      setData(mockData);
+      if (!vaultAddress) {
+        throw new Error('Vault address is required for querying lens data');
+      }
+
+      // Collect data based on lens type
+      let queryData: LensData = {
+        lensAddress,
+        chain: selectedChain,
+        chainId: selectedChainConfig?.id,
+        timestamp: new Date().toISOString(),
+        vaultAddress,
+        tokenAddress: tokenAddress || 'Not provided',
+      };
+
+             // Add lens-specific data
+       switch (selectedLens) {
+         case 'utilsLens':
+           if (apysError) throw new Error(`APYs query failed: ${apysError.message}`);
+           if (priceError) throw new Error(`Price query failed: ${priceError.message}`);
+           
+           queryData = {
+             ...queryData,
+             apys: apys ? {
+               borrowAPY: (apys as any)[0]?.toString(),
+               supplyAPY: (apys as any)[1]?.toString(),
+             } : null,
+             assetPriceInfo: assetPriceInfo ? {
+               price: (assetPriceInfo as any).price?.toString(),
+               timestamp: (assetPriceInfo as any).timestamp?.toString(),
+               oracleAddress: (assetPriceInfo as any).oracleAddress,
+             } : null,
+           };
+           break;
+
+         case 'vaultLens':
+           if (vaultInfoError) throw new Error(`Vault info query failed: ${vaultInfoError.message}`);
+           if (collateralError) throw new Error(`Collateral info query failed: ${collateralError.message}`);
+           
+           queryData = {
+             ...queryData,
+             vaultInfo: vaultInfo ? {
+               name: (vaultInfo as any).name,
+               symbol: (vaultInfo as any).symbol,
+               decimals: (vaultInfo as any).decimals?.toString(),
+               totalAssets: (vaultInfo as any).totalAssets?.toString(),
+               totalBorrows: (vaultInfo as any).totalBorrows?.toString(),
+               totalShares: (vaultInfo as any).totalShares?.toString(),
+             } : null,
+             collateralInfo: collateralInfo ? (collateralInfo as any[]).map((collateral: any) => ({
+               collateral: collateral.collateral,
+               borrowLTV: collateral.borrowLTV?.toString(),
+               liquidationLTV: collateral.liquidationLTV?.toString(),
+               initialLiquidationLTV: collateral.initialLiquidationLTV?.toString(),
+               targetTimestamp: collateral.targetTimestamp?.toString(),
+               rampDuration: collateral.rampDuration?.toString(),
+             })) : null,
+           };
+           break;
+
+         case 'eulerEarnVaultLens':
+           if (earnVaultError) throw new Error(`Earn vault info query failed: ${earnVaultError.message}`);
+           if (accessControlError) throw new Error(`Access control query failed: ${accessControlError.message}`);
+           
+           queryData = {
+             ...queryData,
+             earnVaultInfo: earnVaultInfo ? {
+               timestamp: (earnVaultInfo as any).timestamp?.toString(),
+               vaultName: (earnVaultInfo as any).vaultName,
+               vaultSymbol: (earnVaultInfo as any).vaultSymbol,
+               vaultDecimals: (earnVaultInfo as any).vaultDecimals?.toString(),
+               asset: (earnVaultInfo as any).asset,
+               assetName: (earnVaultInfo as any).assetName,
+               assetSymbol: (earnVaultInfo as any).assetSymbol,
+             } : null,
+             accessControlInfo: accessControlInfo ? {
+               defaultAdmins: (accessControlInfo as any).defaultAdmins,
+               guardianAdmins: (accessControlInfo as any).guardianAdmins,
+               strategyOperatorAdmins: (accessControlInfo as any).strategyOperatorAdmins,
+               guardians: (accessControlInfo as any).guardians,
+               strategyOperators: (accessControlInfo as any).strategyOperators,
+             } : null,
+           };
+           break;
+       }
+
+      setData(queryData);
     } catch (err) {
       setError(err instanceof Error ? err.message : 'An error occurred');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const generateMockData = (lensType: string, vaultAddr: string, tokenAddr: string) => {
-    const baseData = {
-      lensAddress: getLensAddress(),
-      chain: selectedChain,
-      timestamp: new Date().toISOString(),
-    };
-
-    switch (lensType) {
-      case 'utilsLens':
-        return {
-          ...baseData,
-          vaultInfo: {
-            name: 'Sample ERC-4626 Vault',
-            symbol: 'vUSDC',
-            decimals: 18,
-            totalAssets: '1000000000000000000000',
-            totalSupply: '950000000000000000000',
-            apy: '0.0856',
-            pricePerShare: '1.0526',
-            timeToLiquidation: '0',
-            isHealthy: true,
-          },
-          tokenBalances: {
-            balance: '1000000000000000000',
-            allowance: '1000000000000000000000',
-            price: '1.00',
-          },
-          priceData: {
-            onChainPrice: '1.00',
-            lastUpdate: new Date().toISOString(),
-            oracleAddress: '0x1234567890123456789012345678901234567890',
-          },
-        };
-
-      case 'eulerEarnVaultLens':
-        return {
-          ...baseData,
-          strategyAllocations: {
-            totalAllocated: '800000000000000000000',
-            strategies: [
-              { name: 'Compound Strategy', allocation: '0.4', apy: '0.092' },
-              { name: 'Aave Strategy', allocation: '0.3', apy: '0.087' },
-              { name: 'Yearn Strategy', allocation: '0.3', apy: '0.078' },
-            ],
-          },
-          feeConfiguration: {
-            managementFee: '0.01',
-            performanceFee: '0.20',
-            withdrawalFee: '0.005',
-          },
-          rewards: {
-            totalRewards: '50000000000000000000',
-            rewardTokens: ['0x1234567890123456789012345678901234567890'],
-            accessControl: {
-              whitelistEnabled: false,
-              maxDepositors: 1000,
-            },
-          },
-        };
-
-      case 'vaultLens':
-        return {
-          ...baseData,
-          vaultConfiguration: {
-            name: 'Euler Vault',
-            symbol: 'eUSDC',
-            decimals: 18,
-            cap: '10000000000000000000000',
-            fees: {
-              borrowFee: '0.001',
-              flashLoanFee: '0.0009',
-            },
-            irm: {
-              baseRate: '0.02',
-              kink: '0.8',
-              multiplier: '0.1',
-              jumpMultiplier: '1.0',
-            },
-          },
-          totals: {
-            totalAssets: '5000000000000000000000',
-            totalBorrows: '3000000000000000000000',
-            totalShares: '4500000000000000000000',
-            utilizationRate: '0.6',
-          },
-          collateral: [
-            {
-              token: '0x1234567890123456789012345678901234567890',
-              symbol: 'USDC',
-              ltv: '0.85',
-              liquidationThreshold: '0.88',
-              liquidationPenalty: '0.05',
-              balance: '1000000000',
-            },
-            {
-              token: '0x0987654321098765432109876543210987654321',
-              symbol: 'WETH',
-              ltv: '0.75',
-              liquidationThreshold: '0.80',
-              liquidationPenalty: '0.08',
-              balance: '1000000000000000000',
-            },
-          ],
-          oracleData: {
-            oracleAddress: '0x1234567890123456789012345678901234567890',
-            price: '1.00',
-            lastUpdate: new Date().toISOString(),
-            heartbeat: '3600',
-          },
-        };
-
-      default:
-        return baseData;
     }
   };
 
@@ -255,6 +320,11 @@ export default function LensPage() {
             <div className="font-mono text-orange-300 break-all">
               {getLensAddress() || 'No address available for selected chain'}
             </div>
+            {selectedChainConfig && (
+              <div className="text-sm text-gray-400 mt-2">
+                Chain ID: {selectedChainConfig.id} ({selectedChainConfig.name})
+              </div>
+            )}
           </div>
         </div>
 
@@ -264,7 +334,7 @@ export default function LensPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                Vault Address (Optional)
+                Vault Address *
               </label>
               <input
                 type="text"
@@ -290,7 +360,7 @@ export default function LensPage() {
           <div className="mt-6">
             <button
               onClick={handleQuery}
-              disabled={loading}
+              disabled={loading || !vaultAddress || !lensAddress}
               className="w-full bg-orange-300 text-black font-semibold py-3 px-6 rounded-lg hover:bg-orange-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? 'Querying...' : 'Query Lens Data'}
