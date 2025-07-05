@@ -221,7 +221,6 @@ const VerifiedVaultPage = () => {
               <option value={56}>BNB Smart Chain</option>
               <option value={71}>Unichain</option>
               <option value={8453}>Base</option>
-              <option value={11155111}>Sepolia Testnet</option>
             </select>
             <span className="text-sm text-gray-400">
               Current: {getNetworkName(selectedNetwork)}

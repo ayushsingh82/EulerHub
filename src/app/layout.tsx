@@ -28,7 +28,7 @@ import {
 } from "@tanstack/react-query";
 
 const config = getDefaultConfig({
-  appName: 'EulerHub ',
+  appName: 'EulerHub',
   projectId: process.env.NEXT_PUBLIC_WALLET_CONNECT_PROJECT_ID || 'YOUR_PROJECT_ID',
   chains: [sepolia, mainnet, polygon, optimism, arbitrum, base],
   ssr: true,
@@ -88,6 +88,11 @@ const Footer = () => {
               <li>
                 <a href="/verified-vault" className="text-gray-400 hover:text-orange-300 transition-colors">
                   Verified Vaults
+                </a>
+              </li>
+              <li>
+                <a href="/vaultadrresses" className="text-gray-400 hover:text-orange-300 transition-colors">
+                  Vault Addresses
                 </a>
               </li>
             
@@ -171,6 +176,9 @@ export default function RootLayout({
                       </a>
                       <a href="/verified-vault" className="text-gray-300 hover:text-orange-300 transition-colors px-2 py-2 text-sm font-medium hover:underline">
                         Verified Vault
+                      </a>
+                      <a href="/vaultadrresses" className="text-gray-300 hover:text-orange-300 transition-colors px-2 py-2 text-sm font-medium hover:underline">
+                        Vault Addresses
                       </a>
                       <a href="/offchain-price" className="text-gray-300 hover:text-orange-300 transition-colors px-2 py-2 text-sm font-medium hover:underline">
                         Offchain
