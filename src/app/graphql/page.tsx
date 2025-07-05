@@ -12,17 +12,20 @@ import {
   getBorrowById,
   VaultStatus,
   EulerVault,
-  Borrow
+  Borrow,
+  Liquidate,
+  getLiquidates,
+  getLiquidateById
 } from './helper';
 
 const GraphQLPage = () => {
   const [mounted, setMounted] = useState(false);
   const [selectedNetwork, setSelectedNetwork] = useState<Network>('mainnet');
-  const [queryType, setQueryType] = useState<'vaultStatus' | 'eulerVault' | 'borrow'>('vaultStatus');
+  const [queryType, setQueryType] = useState<'vaultStatus' | 'eulerVault' | 'borrow' | 'liquidate'>('vaultStatus');
   const [queryMode, setQueryMode] = useState<'list' | 'single'>('list');
   const [inputId, setInputId] = useState('');
   const [loading, setLoading] = useState(false);
-  const [data, setData] = useState<{ vaultStatuses?: VaultStatus[]; vaultStatus?: VaultStatus; eulerVaults?: EulerVault[]; eulerVault?: EulerVault; borrows?: Borrow[]; borrow?: Borrow } | null>(null);
+  const [data, setData] = useState<{ vaultStatuses?: VaultStatus[]; vaultStatus?: VaultStatus; eulerVaults?: EulerVault[]; eulerVault?: EulerVault; borrows?: Borrow[]; borrow?: Borrow; liquidates?: Liquidate[]; liquidate?: Liquidate } | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const networks = Object.keys(GRAPHQL_ENDPOINTS) as Network[];
@@ -89,6 +92,17 @@ const GraphQLPage = () => {
             result = await getBorrowById(selectedNetwork, inputId.trim());
           }
           break;
+
+        case 'liquidate':
+          if (queryMode === 'list') {
+            result = await getLiquidates(selectedNetwork);
+          } else {
+            if (!inputId.trim()) {
+              throw new Error('Please enter a liquidate ID');
+            }
+            result = await getLiquidateById(selectedNetwork, inputId.trim());
+          }
+          break;
           
         default:
           throw new Error('Invalid query type');
@@ -140,6 +154,18 @@ const GraphQLPage = () => {
           <div><span className="text-gray-400">Account:</span> <span className="text-blue-400">{borrow.account}</span></div>
           <div><span className="text-gray-400">Assets:</span> <span className="text-blue-400">{borrow.assets}</span></div>
           <div><span className="text-gray-400">Vault:</span> <span className="text-blue-400">{borrow.vault}</span></div>
+        </div>
+      </div>
+    );
+
+    const renderLiquidate = (liquidate: Liquidate) => (
+      <div key={liquidate.id} className="bg-gray-900 p-4 rounded-lg border border-gray-700">
+        <h4 className="text-lg font-semibold text-red-400 mb-2">Liquidate: {liquidate.id}</h4>
+        <div className="grid grid-cols-2 gap-2 text-sm">
+          <div><span className="text-gray-400">Violator:</span> <span className="text-red-400">{liquidate.violator}</span></div>
+          <div><span className="text-gray-400">Liquidator:</span> <span className="text-green-400">{liquidate.liquidator}</span></div>
+          <div><span className="text-gray-400">Yield Balance:</span> <span className="text-blue-400">{liquidate.yieldBalance}</span></div>
+          <div><span className="text-gray-400">Repay Assets:</span> <span className="text-blue-400">{liquidate.repayAssets}</span></div>
         </div>
       </div>
     );
@@ -198,6 +224,24 @@ const GraphQLPage = () => {
           {borrows.filter(Boolean).map(renderBorrow)}
         </div>
       );
+    } else if (queryType === 'liquidate') {
+      const liquidates = queryMode === 'list' ? data.liquidates : (data.liquidate ? [data.liquidate] : []);
+      console.log('Liquidate data:', liquidates);
+      if (!liquidates || liquidates.length === 0 || liquidates.every((l: unknown) => !l)) {
+        return (
+          <div className="text-center py-8 text-gray-400">
+            <p>No liquidate data found for this query</p>
+            {queryMode === 'single' && (
+              <p className="text-sm mt-2">The specified ID might not exist or the query returned null</p>
+            )}
+          </div>
+        );
+      }
+      return (
+        <div className="space-y-4">
+          {liquidates.filter(Boolean).map(renderLiquidate)}
+        </div>
+      );
     }
 
     return <pre className="bg-gray-900 p-4 rounded-lg overflow-auto text-blue-400">{JSON.stringify(data, null, 2)}</pre>;
@@ -245,12 +289,13 @@ const GraphQLPage = () => {
               </label>
               <select
                 value={queryType}
-                onChange={(e) => setQueryType(e.target.value as 'vaultStatus' | 'eulerVault' | 'borrow')}
+                onChange={(e) => setQueryType(e.target.value as 'vaultStatus' | 'eulerVault' | 'borrow' | 'liquidate')}
                 className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 <option value="vaultStatus">Vault Status</option>
                 <option value="eulerVault">Euler Vault</option>
                 <option value="borrow">Borrow</option>
+                <option value="liquidate">Liquidate</option>
               </select>
             </div>
 
@@ -264,7 +309,7 @@ const GraphQLPage = () => {
                 onChange={(e) => setQueryMode(e.target.value as 'list' | 'single')}
                 className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <option value="list">List (First 5)</option>
+                <option value="list">List (First 5/10)</option>
                 <option value="single">Single (By ID)</option>
               </select>
             </div>
@@ -274,7 +319,8 @@ const GraphQLPage = () => {
               <div>
                 <label className="block text-sm font-medium text-gray-300 mb-2">
                   {queryType === 'vaultStatus' ? 'Vault ID' : 
-                   queryType === 'eulerVault' ? 'Euler Vault ID' : 'Borrow ID'}
+                   queryType === 'eulerVault' ? 'Euler Vault ID' : 
+                   queryType === 'borrow' ? 'Borrow ID' : 'Liquidate ID'}
                 </label>
                 <input
                   type="text"
@@ -341,7 +387,7 @@ const GraphQLPage = () => {
         <div className="mt-8 bg-gray-900 p-6 rounded-lg border border-gray-700">
           <h2 className="text-2xl font-semibold mb-6 text-orange-400">Documentation</h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
             <div>
               <h3 className="text-lg font-semibold text-orange-300 mb-3">Vault Status</h3>
               <p className="text-gray-400 text-sm mb-2">Query vault status information including:</p>
@@ -372,6 +418,17 @@ const GraphQLPage = () => {
                 <li>• Borrowed assets</li>
                 <li>• Associated vault</li>
                 <li>• Borrow ID</li>
+              </ul>
+            </div>
+
+            <div>
+              <h3 className="text-lg font-semibold text-red-400 mb-3">Liquidate</h3>
+              <p className="text-gray-400 text-sm mb-2">Query liquidation events including:</p>
+              <ul className="text-gray-400 text-sm space-y-1">
+                <li>• Violator address</li>
+                <li>• Liquidator address</li>
+                <li>• Yield balance</li>
+                <li>• Repay assets</li>
               </ul>
             </div>
           </div>

@@ -81,6 +81,31 @@ export const QUERIES = {
         vault
       }
     }
+  `,
+
+  // Liquidate Queries
+  GET_LIQUIDATES: `
+    query GetLiquidates {
+      liquidates(first: 10) {
+        id
+        liquidator
+        repayAssets
+        yieldBalance
+        violator
+      }
+    }
+  `,
+
+  GET_LIQUIDATE_BY_ID: `
+    query GetLiquidate($id: String!) {
+      liquidate(id: $id) {
+        id
+        violator
+        yieldBalance
+        repayAssets
+        liquidator
+      }
+    }
   `
 } as const;
 
@@ -105,6 +130,14 @@ export interface Borrow {
   account: string;
   assets: string;
   vault: string;
+}
+
+export interface Liquidate {
+  id: string;
+  violator: string;
+  yieldBalance: string;
+  repayAssets: string;
+  liquidator: string;
 }
 
 export interface GraphQLResponse<T> {
@@ -200,6 +233,22 @@ export async function getBorrowById(network: Network, id: string) {
   return executeQuery<{ borrow: Borrow }>(
     network,
     QUERIES.GET_BORROW_BY_ID,
+    { id: id.toString() }
+  );
+}
+
+export async function getLiquidates(network: Network) {
+  return executeQuery<{ liquidates: Liquidate[] }>(
+    network,
+    QUERIES.GET_LIQUIDATES
+  );
+}
+
+export async function getLiquidateById(network: Network, id: string) {
+  console.log('Executing liquidate query with ID:', id);
+  return executeQuery<{ liquidate: Liquidate }>(
+    network,
+    QUERIES.GET_LIQUIDATE_BY_ID,
     { id: id.toString() }
   );
 }
